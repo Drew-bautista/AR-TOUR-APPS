@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "844463159735",
+    "project_id": "aguinaldoshrinear",
+    "storage_bucket": "aguinaldoshrinear.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:844463159735:android:884bb9c7605cdf9792d032",
+        "android_client_info": {
+          "package_name": "com.aguinaldoshrine.artour"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCASScBwDK3Z0hgUearsDy76qjCs_P39ks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

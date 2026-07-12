@@ -1,0 +1,55 @@
+# GitHub Actions workflow -> copy this file to .github/workflows/android-ci-build.yml
+# CI will install Unity, run the editor BuildCommand.PerformAndroidBuild and upload the APK as an artifact.
+
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Unity (game-ci)
+        uses: game-ci/unity-setup@v2
+        with:
+          unityVersion: '6000.3.14f1' # from ProjectSettings/ProjectVersion.txt — adjust if needed
+          components: android
+
+      - name: (Optional) Decode Unity license (if provided)
+        if: ${{ secrets.UNITY_LICENSE != '' }}
+        run: |
+          echo "$UNITY_LICENSE" | base64 --decode > unitylicense.ulf
+          # Attempt manual activation using license file
+          unity -batchmode -nographics -projectPath . -manualLicenseFile unitylicense.ulf || true
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      - name: Build Android (headless)
+        run: |
+          set -e
+          unity -quit -batchmode -nographics -projectPath . -executeMethod BuildCommand.PerformAndroidBuild -logFile build.log || exit 1
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_ALIAS_PASS: ${{ secrets.KEY_ALIAS_PASS }}
+          BUNDLE_ID: ${{ secrets.BUNDLE_ID }}
+          DEVELOPMENT_BUILD: 0
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Aguinaldo-APK
+          path: Builds/Android/AguinaldoShrine_AR.apk
+
+# NOTES:
+# - Copy this file to .github/workflows/android-ci-build.yml in your repo (CI cannot create .github folder here).
+# - Set required GitHub Secrets: KEYSTORE_BASE64 (base64 of keystore), KEYSTORE_PASS, KEY_ALIAS, KEY_ALIAS_PASS, BUNDLE_ID.
+# - For Unity license activation, use UNITY_LICENSE (base64 of the .ulf file) or UNITY_SERIAL / UNITY_EMAIL / UNITY_PASSWORD with other activation methods.
+# - The workflow uses 'unity' CLI provided by game-ci/unity-setup. Adjust unityVersion if needed.
